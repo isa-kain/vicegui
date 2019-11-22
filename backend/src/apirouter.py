@@ -5,6 +5,9 @@ from flask import request
 from . import socketio
 import os
 import json
+# from xml.dom.minidom import parse, parseString
+import xml.etree.ElementTree as ET
+
 
 apirouter = Blueprint("router", __name__)
 # myViceBoard = ViceBoardController()
@@ -25,9 +28,9 @@ def showChanges():
   try:
     message = 'Thing retrieved'
     updatedParams = request.get_json(force=True)
-    print updatedParams
-    print updatedParams['params']
-    print updatedParams['params']['selectClock']
+    print(updatedParams)
+    print(updatedParams['params'])
+    print(updatedParams['params']['selectClock'])
 
   except Exception as e:
     print('Error: ', e)
@@ -47,11 +50,21 @@ def showChanges():
                     ## otherwise, parsed data in request.form, and data is empty
 
 
-def pullConfiguration():
-  ## loads configuration file into editable format
-  return 0
+# XML parsing uses ElementTree API:
+# https://docs.python.org/3/library/xml.etree.elementtree.html#module-xml.etree.ElementTree
 
-def updateChanges(configFile, updates):
+def updateConfiguration(updatesFromGui):
+  ## loads configuration file into editable format
+  configTree = ET.parse('testconfig.xml') #tree represents whole XML document
+  configRoot = configTree.getroot() #root represents body of data n file
+  # root divided into children, each of which have attributes:
+    # tag; attribute; 
+  # for param in root.findall('targetParameter'):
+
+
+
+
+  # print(configData) ## Document instance, print doesn't show contents
   ## writes changes onto configuration file
     ## for each key in updates (which is a json object):
       ## find corresponding section in configFile

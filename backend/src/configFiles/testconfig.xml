@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<general>
+   <waitForDR>0</waitForDR>
+   <noEB>1</noEB>
+   <spillSignalsDisabled>0</spillSignalsDisabled>
+   <testEnableDuringBeam>0</testEnableDuringBeam>
+   <testEnableSequence>2,3</testEnableSequence>
+   <!-- PED,LED -->
+   <Network>
+   </Network>
+   <Hardware>
+      <crateId>2</crateId>
+      <board>
+         <!-- TIME board always as first -->
+         <ID>1</ID>
+         <type>TIME</type>
+      </board>
+      <board>
+         <type>CAEN_DT5495</type>
+         <ID>1</ID>
+         <!-- Set here the rest of the configuration -->
+         <IPAddress>128.141.196.235</IPAddress>
+       <!-- Channels are of types TriggerInput/TriggerOutput/Busy/ControlSig/SPS -->
+       <!-- Gate field can be left out if not needed -->
+       <!-- Gate + Delay should be less than 65535 (ns) -->
+       <!-- Gate and delay values in nanosec-->
+       <!-- Channels count from 0-7-->
+
+         <!--Channel>
+            <ID>0</ID>
+            <Type>ControlSig</Type>
+            <Port>7</Port>
+            <Gate>1234</Gate> 
+            <Delay>13000</Delay> 
+         </Channel-->
+         <Channel>
+            <ID>1</ID>
+            <Type>TriggerInput</Type>
+            <Port>6</Port>
+            <Gate>2000</Gate>
+            <Delay>100</Delay>
+         </Channel>
+         <Channel>
+            <ID>2</ID>
+            <Type>TriggerOutput</Type>
+            <Port>0</Port>
+            <Gate>1000</Gate>
+            <Delay>200</Delay>
+         </Channel>
+
+      </board>
+   </Hardware>
+   <EventBuilder>
+      <dumpEvent>0</dumpEvent>
+      <dumpDirName>/tmp/raw/</dumpDirName>
+      <!-- /tmp/RUN/spill[.gz][.txt] -->
+      <dumpCompress>0</dumpCompress>
+      <sendEvent>1</sendEvent>
+      <recvEvent>0</recvEvent>
+      <!-- Number of machine to wait for -->
+      <compress>0</compress>
+   </EventBuilder>
+</general>
