@@ -146,12 +146,6 @@ export default {
     }
   },
   methods: {
-    contactServer: function () {
-      console.log('contacting server')
-      axios.get('/api/sayHello').then(response => {
-        console.log(response)
-      })
-    },
     readOptions: function () {
       try {
         var selectOpt = document.getElementById('dropSelect').value
@@ -182,6 +176,10 @@ export default {
     }
   }
 }
+// function testFunction () {
+//   // load most recent configuration
+//   return 0
+// }
 </script>
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 <!-- Add "scoped" attribute to limit CSS to this component only -->
