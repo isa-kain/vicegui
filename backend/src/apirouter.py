@@ -28,24 +28,24 @@ def listAllConfigs():
 
 
 @apirouter.route('/getConfigParams',methods=['POST'])
-def getConfigParams(selectedConfig):
+def getConfigParams():
   ## loads selected configuration file into dictionary of parameters
   ## returns dictionary of parameters to GUI
-
-  configFile = open('./configFiles/testconfig.xml')
-  # configFile = open(selectedConfig)
-  soup = bs.BeautifulSoup(configFile, 'xml').prettify()
+  selectedConfig = request.get_json(force=True)['selectedConfig']
+  # configFile = open('/Users/X-phile/Public/vicegui/backend/src/configFiles/dummy-config1.xml')
+  configFile = open(selectedConfig)
+  soup = bs.BeautifulSoup(configFile, 'xml') #only parses first couple of lines? wtf
   paramlist = soup.find_all()
+  print('PARAM LIST: ', len(paramlist), paramlist)
 
   paramdict = {}
-  for i, plist in enumerate(paramlist):
-    tag = plist[i].name
-    val = plist[i].string
+  for element in paramlist:
+    tag = element.name
+    val = element.string
     print(tag, val)
-    # check designated datatype, then convert
     paramdict.update( {tag:val} )
 
-  return jsonify({'Parameters': paramdict})
+  return jsonify(paramdict)
 
 
 @apirouter.route('/getConfigXML',methods=['POST'])
@@ -69,13 +69,14 @@ def createNewConfig():
   print(txt)
   newfile.write(txt)
   newfile.close()
-  return 'Writing complete.'
+  return 'Writing complete: '+ timestamp
 
+@apirouter.route('/updateConfigFromParams',methods=['POST'])
 def updateConfigFromParams():
   ## recieves dict of parameters from GUI
   ## writes changes in dict to config file
   ## calls createNewConfig()
-  return 0
+  return ''
 
 
 

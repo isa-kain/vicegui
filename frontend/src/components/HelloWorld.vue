@@ -1,6 +1,8 @@
 <template> <!-- could use CSS grid-->
   <div class="hello">
-    <title>VICE++ Control GUI</title>
+    <br>
+    <h1>VICE++ Control GUI</h1>
+    <p>Here is some information. This is the control page.</p>
     <!-- <h1>{{ msg }}</h1> -->
     <!-- <h2>Essential Links</h2>
     <ul>
@@ -81,58 +83,44 @@
         </a>
       </li>
     </ul> -->
-    <!-- <Navigation name="nav"></Navigation> -->
-    <div class="row">
-      <div class="column is-half">
-        <div class="fsm">
-          <section style="background-color:black;color:white;margin:10px 5px 10px 5px;padding:10px 5px 10px 5px;"> <!-- Area for FSM status -- align left-->
-            FSM div to be built here
-            <div class="columns is-0">
-              <div class="Initialized">Initialized</div>
-              <div class="Configured">Configured</div>
-              <div class="Running">Running</div>
-              <div class="Paused">Paused</div>
-              <div class="Error">Error</div>
-            </div>
-          </section>
-        </div>
-      </div>
 
-      <div class="column is-half">
-        <div class="config">
-          <section style="background-color:#e6f2ff;color:black;margin:10px 5px 10px 5px;padding:10px 5px 10px 5px;"> <!-- Area for configurables -- align right-->
-            Configurables to be placed here
-            <section>
-                  <form id="numCards">
-                    <p><label>Number of VFEs: <input form="numCards" type="number" id="numVFE" maxlength="5" style="width:120px;"></label></p>
-                    <p><label>Number of FEs: <input form="numCards" type="number" id="numFE" maxlength="5" style="width:120px;"></label></p>
-                  </form>
-
-                  <!-- <button id='clickMe' v-on:click="contactServer()">Click me!</button><br> -->
-
-                  <form>
-                    <input type="radio" name='clock' id='clockSource' value="1">Clock Source 1<br>
-                    <input type="radio" name='clock' id='clockSource' value="2">Clock Source 2<br>
-                  </form><br>
-
-                  <select id='dropSelect'>
-                    <option selected disabled>Choose one</option>
-                    <option value="a">A</option>
-                    <option value="b">B</option>
-                    <option value="c">C</option>
-                    <option value="d">D</option>
-                  </select>
-
-                  <p></p>
-
-                  <button v-on:click="readOptions()">Show selections</button>
-                  <button v-on:click="submitChanges()">Update from selection</button>
-
-            </section>
-          </section>
-        </div>
-      </div>
+    <div id="FSM" class=column-left style="background-color:#e6f2ff;color:black;padding:10px 5px 10px 5px;">
+      <h2>FSM runstate to be placed here</h2>
     </div>
+
+    <div id="Configs" class=column-right style="background-color:#e6f2ff;color:black;padding:10px 5px 10px 5px;">
+      <h2 >Configurables to be placed here</h2>
+      <b-col>
+        <select id="config-files">Select configuration to load:</select>
+        <b-button v-on:click="defineConfigurables()">Load selected configuration</b-button>
+        <p></p>
+      </b-col>
+      <div>
+        <form id="config-params"></form>
+      </div>
+      <!-- <form id="numCards">
+        <p><label>Number of VFEs: <input form="numCards" type="number" id="numVFE" maxlength="5" style="width:120px;"></label></p>
+        <p><label>Number of FEs: <input form="numCards" type="number" id="numFE" maxlength="5" style="width:120px;"></label></p>
+      </form><br>
+
+      <form>
+        <input type="radio" name='clock' id='clockSource' value="1">Clock Source 1<br>
+        <input type="radio" name='clock' id='clockSource' value="2">Clock Source 2<br>
+      </form><br>
+
+      <select id='dropSelect'>
+        <option selected disabled>Choose one</option>
+        <option value="a">A</option>
+        <option value="b">B</option>
+        <option value="c">C</option>
+        <option value="d">D</option>
+      </select> -->
+
+      <p></p>
+      <button v-on:click="readOptions()">Test: read entries of param fields</button>
+      <button >Apply configuration</button>
+    </div>
+
   </div>
 </template>
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
@@ -145,34 +133,98 @@ export default {
       msg: 'Welcome to Your Vue.js App'
     }
   },
+  mounted: function () {
+    this.grabAllConfigs()
+  },
   methods: {
     readOptions: function () {
-      try {
-        var selectOpt = document.getElementById('dropSelect').value
-        var selectClock = document.querySelector('input[id="clockSource"]:checked').value
-        var numVFE = document.getElementById('numVFE').value
-        var numFE = document.getElementById('numFE').value
-        var selectedOptions = {'Dropdown': selectOpt, 'Clock': selectClock, 'Num VFEs': numVFE, 'Num FEs': numFE}
-        console.log(selectedOptions)
-        return selectedOptions
-      } catch (error) {
-        console.log(error)
+      // reads values of html forms
+      console.log('Starting to parse input values')
+      var cform = document.getElementById('config-params')
+      var namelist = []
+      var newvals = []
+      for (var i = 0; i < 1; i++) {
+        console.log('name: ' + cform['input' + i].name)
+        namelist.push(cform['input' + i].name)
+        console.log('value: ' + cform['input' + i].value)
+        newvals.push(cform['input' + i].value)
       }
-      // there's probably a readBody() sort of function to read in all options
-    },
-    submitChanges: function () {
-      console.log('submitting selections')
-      axios.post('/api/showChanges', {
-        msg: 'Submitting',
-        params: { // would ideally like to set params = readOptions() but can't figure out correct syntax
-          selectOpt: document.getElementById('dropSelect').value,
-          selectClock: document.querySelector('input[id="clockSource"]:checked').value
-        }
+      console.log(namelist)
+      console.log(newvals)
+      var newdict = {'tag': namelist, 'val': newvals}
+      console.log(newdict)
+      axios.post('/api/updateConfigFromParams', {
+        updates: newdict
       }).then(function (response) {
         console.log(response)
       }).catch(function (error) {
         console.log(error)
       })
+    },
+    submitChanges: function () {
+      // sends output of readOptions() to server
+      axios.post('/api/showChanges', {
+        baseConfig: document.getElementById('config-files').value,
+        selections: this.readOptions() // need to fix
+      }).then(function (response) {
+        console.log(response)
+      }).catch(function (error) {
+        console.log(error)
+      })
+    },
+    defineConfigurables: function () {
+      // recieves dict of parameters being configured
+      // dynamically declares editable forms for each parameter
+      // clears any previously declared elements
+      var editables = document.getElementById('config-params')
+      while (editables.hasChildNodes()) {
+        editables.removeChild(editables.firstElementChild)
+      }
+      axios.post('/api/getConfigParams', {
+        selectedConfig: document.getElementById('config-files').value
+      }).then(function (response) {
+        console.log(response.data)
+        var params = response.data
+        var keys = Object.keys(params)
+        console.log(keys)
+        var forms = document.getElementById('config-params')
+        for (var i = 0; i < keys.length; i++) {
+          var label = document.createElement('label')
+          label.for = keys[i]
+          label.innerText = keys[i] + ': '
+          console.log(label.text)
+          forms.appendChild(label)
+
+          var p = document.createElement('input')
+          p.id = 'input' + i
+          p.name = keys[i]
+          p.value = params[keys[i]]
+          forms.appendChild(p)
+
+          forms.appendChild(document.createElement('br'))
+        }
+      }).catch(function (error) {
+        console.log(error)
+      })
+    },
+    grabAllConfigs: function () {
+      // ask server for list of all config files
+      this.axios.post('/api/listAllConfigs', {
+      }).then(response => {
+        console.log(response)
+        this.fillConfigMenu(response.data.cfiles)
+      }).catch(function (error) {
+        console.log(error)
+      })
+    },
+    fillConfigMenu: function (cfiles) {
+      // fill dropdown selection with list of config files
+      var menu = document.getElementById('config-files')
+      for (var i = 0; i < cfiles.length; i++) {
+        var newOption = document.createElement('option')
+        newOption.innerHTML = cfiles[i]
+        menu.appendChild(newOption)
+      }
     }
   }
 }
@@ -199,9 +251,14 @@ a {
   color: #42b983;
 }
 
-.column {
+.column-left {
   float: left;
-  width: 50%;
+  width: 49%;
+}
+
+.column-right {
+  float: right;
+  width: 49%;
 }
 
 /* Clear floats after the columns */

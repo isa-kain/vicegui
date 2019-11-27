@@ -4,7 +4,7 @@
     <b-collapse is-nav id="nav_collapse">
       <b-navbar-nav>
         <b-nav-item to="/">Home</b-nav-item>
-        <b-nav-item to="/configuration">Config</b-nav-item> <!-- each item is page-->
+        <b-nav-item to="/configuration">Config</b-nav-item>
       </b-navbar-nav>
     </b-collapse>
   </b-navbar>

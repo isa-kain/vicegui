@@ -1,5 +1,6 @@
 <template>
   <div>
+    <br>
     <h1>Configuration</h1>
     <p>Here is some information. This is the configuration page</p>
     <b-row>
