@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify
 from flask_socketio import emit, join_room, leave_room
 from flask import request
-# from .viceController import ViceBoardController 
+# from .viceController import ViceBoardController
+from datetime import datetime 
 from . import socketio
 import os
 import json
@@ -19,7 +20,9 @@ apirouter = Blueprint("router", __name__)
 @apirouter.route('/listAllConfigs',methods=['POST'])
 def listAllConfigs():
   ## returns list of all existing config files
+  print('++++++++ entered listAllConfigs +++++++++++')
   cfiles = glob.glob('/Users/X-phile/Public/vicegui/backend/src/configFiles/*.xml')
+  ## sort list, most recent first?
   print('cfiles: ', cfiles)
   return jsonify({"cfiles": cfiles})
 
@@ -59,6 +62,26 @@ def getConfigXML(): #selectedConfig
 def createNewConfig():
   ## when "Submit" button is hit (either whole file editing // ind. parameter updates),
   ## creates new config file, names it with timestamp, and fills with updated configuration 
+  timestamp = str(datetime.now()).replace(' ', '_')
+  filepath = '/Users/X-phile/Public/vicegui/backend/src/configFiles/'
+  newfile = open(filepath+timestamp+'.xml', 'w+')
+  txt = request.get_json(force=True)['changedConfig']
+  print(txt)
+  newfile.write(txt)
+  newfile.close()
+  return 'Writing complete.'
+
+def updateConfigFromParams():
+  ## recieves dict of parameters from GUI
+  ## writes changes in dict to config file
+  ## calls createNewConfig()
+  return 0
+
+
+
+## perhaps move to new API file when we start having functions that relate to the board?
+def applyConfig():
+  ## applies selected configuration to the board
   return 0
 
 

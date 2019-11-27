@@ -9,7 +9,7 @@
       <!-- For some reason, above bootstrap method does not fill dropdown properly-->
       <b-col sm="12">
         <select id="config-files">Select configuration to load:</select>
-        <b-button v-on:click="getSelectedConfigText()">Load selected configuration</b-button>
+        <b-button v-on:click="getSelectedConfigText()">Load selected configuration</b-button><br>
       </b-col>
     </b-row>
 
@@ -17,7 +17,7 @@
       <b-col sm="12">
         <b-form-textarea
           id="textarea"
-          v-model="configtext"
+          v-model="ctext"
           placeholder="Enter something..."
           rows="8"
         ></b-form-textarea>
@@ -26,8 +26,8 @@
 
     <b-row>
       <b-col sm="12">
-        <!-- <b-button v-on:click="sendChanges()">Save edited onfiguration as new file</b-button> -->
-        <b-button>Save edited onfiguration as new file</b-button>
+        <b-button v-on:click="sendChanges()">Save edited onfiguration as new file</b-button>
+        <!-- <b-button>Save edited onfiguration as new file</b-button> -->
       </b-col>
     </b-row>
   </div>
@@ -38,60 +38,59 @@ export default {
   name: 'Configuration', // this is the name of the component
   data () {
     return {
-      cfiles: [],
-      configtext: ''
+      ctext: ''
     }
   },
   mounted: function () {
     this.grabAllConfigs()
   },
   methods: {
-    dummyTest: function () {
-      var text = 'TEXT!!!!!'
-      console.log(text)
-      document.getElementById('textbox').value = text
-    },
     grabAllConfigs: function () {
       // ask server for list of all config files
       this.axios.post('/api/listAllConfigs', {
-        params: {}
       }).then(response => {
-        console.log('Successfully got list of configs')
         console.log(response)
-        // this.cfiles = response.data.cfiles
-        this.listAllConfigs(response.data.cfiles)
+        this.fillConfigMenu(response.data.cfiles)
       }).catch(function (error) {
         console.log(error)
       })
     },
-    listAllConfigs: function (cfiles) {
-      // fill dropdown selection with these files
-      this.cfiles = cfiles
+    fillConfigMenu: function (cfiles) {
+      // fill dropdown selection with list of config files
       var menu = document.getElementById('config-files')
       for (var i = 0; i < cfiles.length; i++) {
         var newOption = document.createElement('option')
         newOption.innerHTML = cfiles[i]
         menu.appendChild(newOption)
       }
-      console.log('Listed all config files')
-      console.log(cfiles, this.cfiles)
     },
     getSelectedConfigText: function () {
       // reports which config file user selects from dropdown
       // grabs contents of selected file from server
-      // assigns contents to "configtext" global var, which writes automatically to textarea
+      // assigns contents to "ctext" global var, which writes automatically to textarea
       var selectedConfig = document.getElementById('config-files').value
       console.log(selectedConfig)
       this.axios.post('/api/getConfigXML', {
         selected: selectedConfig
       }).then(response => {
-        this.configtext = response.data
+        this.ctext = response.data
       }).catch(function (error) {
         console.log(error)
       })
     },
     sendChanges: function () {
       // sends changes to server
+      var changedText = document.getElementById('textarea').value
+      console.log('Pulled text:')
+      console.log(changedText)
+      this.axios.post('/api/createNewConfig', {
+        changedConfig: changedText
+      }).then(response => {
+        console.log('recieved response')
+        console.log(response)
+      }).catch(function (error) {
+        console.log(error)
+      })
       return 0
     }
   }
