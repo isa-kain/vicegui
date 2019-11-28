@@ -7,7 +7,6 @@ from . import socketio
 import os
 import json
 # from xml.dom.minidom import parse, parseString
-# import xml.etree.ElementTree as ET
 import bs4 as bs
 import glob
 
@@ -20,9 +19,8 @@ apirouter = Blueprint("router", __name__)
 @apirouter.route('/listAllConfigs',methods=['POST'])
 def listAllConfigs():
   ## returns list of all existing config files
-  print('++++++++ entered listAllConfigs +++++++++++')
   cfiles = glob.glob('/Users/X-phile/Public/vicegui/backend/src/configFiles/*.xml')
-  ## sort list, most recent first?
+  # for some reason, cfiles = cfiles.sort() returned null
   print('cfiles: ', cfiles)
   return jsonify({"cfiles": cfiles})
 
@@ -55,27 +53,48 @@ def getConfigXML(): #selectedConfig
   selectedConfig = str(request.get_json(force=True)['selected'])
   configFile = open(selectedConfig)
   soup = bs.BeautifulSoup(configFile, 'xml').prettify()
+  configFile.close()
   return soup
 
 
 @apirouter.route('/createNewConfig',methods=['POST'])
-def createNewConfig():
+def createNewConfig(txt=None):
   ## when "Submit" button is hit (either whole file editing // ind. parameter updates),
   ## creates new config file, names it with timestamp, and fills with updated configuration 
   timestamp = str(datetime.now()).replace(' ', '_')
   filepath = '/Users/X-phile/Public/vicegui/backend/src/configFiles/'
   newfile = open(filepath+timestamp+'.xml', 'w+')
-  txt = request.get_json(force=True)['changedConfig']
+  if txt==None: 
+    txt = request.get_json(force=True)['changedConfig']
   print(txt)
   newfile.write(txt)
   newfile.close()
   return 'Writing complete: '+ timestamp
 
+
 @apirouter.route('/updateConfigFromParams',methods=['POST'])
 def updateConfigFromParams():
-  ## recieves dict of parameters from GUI
-  ## writes changes in dict to config file
-  ## calls createNewConfig()
+  ## recieves base configuration, dict of changes to that config from GUI
+  ## writes changes in dict to text of config file
+  ## writes new file by calling createNewConfig()
+
+  basefile = request.get_json(force=True)['baseConfig']
+  updates = request.get_json(force=True)['updates']
+
+  baseconfig = open(basefile)
+  soup = bs.BeautifulSoup(baseconfig, 'xml')
+  print(soup.prettify)
+
+  elementslist = soup.find_all()
+  for i, element in enumerate(elementslist):
+    # print('Element: ', element, element.name, element.string)
+    if element.name in updates.keys():
+      print('Element: ', element.string, 'Matching update: ', updates[element.name])
+      elementslist[i].string = updates[element.name]
+  
+  print('YAY IS UPDATED: ', soup.prettify)
+  createNewConfig(txt=str(soup))
+
   return ''
 
 
@@ -83,7 +102,7 @@ def updateConfigFromParams():
 ## perhaps move to new API file when we start having functions that relate to the board?
 def applyConfig():
   ## applies selected configuration to the board
-  return 0
+  return ''
 
 
 

@@ -89,36 +89,23 @@
     </div>
 
     <div id="Configs" class=column-right style="background-color:#e6f2ff;color:black;padding:10px 5px 10px 5px;">
-      <h2 >Configurables to be placed here</h2>
+      <h2 >Quick Configuration:</h2>
       <b-col>
         <select id="config-files">Select configuration to load:</select>
+        <p></p>
         <b-button v-on:click="defineConfigurables()">Load selected configuration</b-button>
         <p></p>
       </b-col>
+
       <div>
         <form id="config-params"></form>
       </div>
-      <!-- <form id="numCards">
-        <p><label>Number of VFEs: <input form="numCards" type="number" id="numVFE" maxlength="5" style="width:120px;"></label></p>
-        <p><label>Number of FEs: <input form="numCards" type="number" id="numFE" maxlength="5" style="width:120px;"></label></p>
-      </form><br>
-
-      <form>
-        <input type="radio" name='clock' id='clockSource' value="1">Clock Source 1<br>
-        <input type="radio" name='clock' id='clockSource' value="2">Clock Source 2<br>
-      </form><br>
-
-      <select id='dropSelect'>
-        <option selected disabled>Choose one</option>
-        <option value="a">A</option>
-        <option value="b">B</option>
-        <option value="c">C</option>
-        <option value="d">D</option>
-      </select> -->
 
       <p></p>
-      <button v-on:click="readOptions()">Test: read entries of param fields</button>
-      <button >Apply configuration</button>
+      <b-button v-on:click="submitChanges()">Save changes as new configuration</b-button>
+      <b-button >Apply selected configuration</b-button>
+
+      <p><i>Note: refresh page to see newly created configuration</i></p>
     </div>
 
   </div>
@@ -141,31 +128,22 @@ export default {
       // reads values of html forms
       console.log('Starting to parse input values')
       var cform = document.getElementById('config-params')
-      var namelist = []
-      var newvals = []
+      var newdict = {}
       for (var i = 0; i < 1; i++) {
-        console.log('name: ' + cform['input' + i].name)
-        namelist.push(cform['input' + i].name)
-        console.log('value: ' + cform['input' + i].value)
-        newvals.push(cform['input' + i].value)
+        var newtag = cform['input' + i].name
+        var newval = cform['input' + i].value
+        newdict[newtag] = newval
       }
-      console.log(namelist)
-      console.log(newvals)
-      var newdict = {'tag': namelist, 'val': newvals}
       console.log(newdict)
-      axios.post('/api/updateConfigFromParams', {
-        updates: newdict
-      }).then(function (response) {
-        console.log(response)
-      }).catch(function (error) {
-        console.log(error)
-      })
+      return newdict
     },
     submitChanges: function () {
       // sends output of readOptions() to server
-      axios.post('/api/showChanges', {
+      console.log('BASECONFIG ' + document.getElementById('config-files').value)
+      console.log('UPDATES ' + this.readOptions())
+      axios.post('/api/updateConfigFromParams', {
         baseConfig: document.getElementById('config-files').value,
-        selections: this.readOptions() // need to fix
+        updates: this.readOptions()
       }).then(function (response) {
         console.log(response)
       }).catch(function (error) {
