@@ -126,10 +126,10 @@ export default {
   methods: {
     readOptions: function () {
       // reads values of html forms
-      console.log('Starting to parse input values')
+      var elementlength = document.getElementById('config-params').querySelectorAll('*[id*="input"]').length // number of parameters
       var cform = document.getElementById('config-params')
       var newdict = {}
-      for (var i = 0; i < 1; i++) {
+      for (var i = 0; i < elementlength; i++) {
         var newtag = cform['input' + i].name
         var newval = cform['input' + i].value
         newdict[newtag] = newval
@@ -143,7 +143,8 @@ export default {
       console.log('UPDATES ' + this.readOptions())
       axios.post('/api/updateConfigFromParams', {
         baseConfig: document.getElementById('config-files').value,
-        updates: this.readOptions()
+        updates: this.readOptions(),
+        newfilename: document.getElementById('newfilename').value
       }).then(function (response) {
         console.log(response)
       }).catch(function (error) {
@@ -166,6 +167,7 @@ export default {
         var keys = Object.keys(params)
         console.log(keys)
         var forms = document.getElementById('config-params')
+
         for (var i = 0; i < keys.length; i++) {
           var label = document.createElement('label')
           label.for = keys[i]
@@ -181,6 +183,11 @@ export default {
 
           forms.appendChild(document.createElement('br'))
         }
+        forms.appendChild(document.createElement('p'))
+        var namebox = document.createElement('input')
+        namebox.id = 'newfilename'
+        namebox.placeholder = 'Optional: name new configuration'
+        forms.appendChild(namebox)
       }).catch(function (error) {
         console.log(error)
       })

@@ -58,12 +58,18 @@ def getConfigXML(): #selectedConfig
 
 
 @apirouter.route('/createNewConfig',methods=['POST'])
-def createNewConfig(txt=None):
+def createNewConfig(txt=None, newfilename=None):
   ## when "Submit" button is hit (either whole file editing // ind. parameter updates),
   ## creates new config file, names it with timestamp, and fills with updated configuration 
   timestamp = str(datetime.now()).replace(' ', '_')
   filepath = '/Users/X-phile/Public/vicegui/backend/src/configFiles/'
-  newfile = open(filepath+timestamp+'.xml', 'w+')
+
+  try: newfilename = request.get_json(force=True)['newfilename']
+  except: newfilename = None
+
+  if newfilename is not None: newfile = open(filepath + timestamp + '_' + newfilename + '.xml', 'w+')
+  else: newfile = open(filepath + timestamp + '.xml', 'w+')
+
   if txt==None: 
     txt = request.get_json(force=True)['changedConfig']
   print(txt)
@@ -80,6 +86,7 @@ def updateConfigFromParams():
 
   basefile = request.get_json(force=True)['baseConfig']
   updates = request.get_json(force=True)['updates']
+  newfilename = request.get_json(force=True)['newfilename']
 
   baseconfig = open(basefile)
   soup = bs.BeautifulSoup(baseconfig, 'xml')
@@ -93,7 +100,7 @@ def updateConfigFromParams():
       elementslist[i].string = updates[element.name]
   
   print('YAY IS UPDATED: ', soup.prettify)
-  createNewConfig(txt=str(soup))
+  createNewConfig(txt=str(soup), newfilename=newfilename)
 
   return ''
 

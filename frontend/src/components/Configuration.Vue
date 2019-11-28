@@ -27,6 +27,12 @@
 
     <b-row>
       <b-col sm="12">
+        <input type="text" id="newfilename" placeholder="Optional: name new configuration">
+      </b-col>      
+    </b-row>
+
+    <b-row>
+      <b-col sm="12">
         <b-button v-on:click="sendChanges()">Save edited onfiguration as new file</b-button>
         <!-- <b-button>Save edited onfiguration as new file</b-button> -->
       </b-col>
@@ -81,11 +87,9 @@ export default {
     },
     sendChanges: function () {
       // sends changes to server
-      var changedText = document.getElementById('textarea').value
-      console.log('Pulled text:')
-      console.log(changedText)
       this.axios.post('/api/createNewConfig', {
-        changedConfig: changedText
+        changedConfig: document.getElementById('textarea').value,
+        newfilename: document.getElementById('newfilename').value
       }).then(response => {
         console.log('recieved response')
         console.log(response)
