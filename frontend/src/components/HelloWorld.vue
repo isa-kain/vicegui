@@ -91,15 +91,31 @@
     <div id="Configs" class=column-right style="background-color:#e6f2ff;color:black;padding:10px 5px 10px 5px;">
       <h2 >Quick Configuration:</h2>
       <b-col>
-        <select id="config-files">Select configuration to load:</select>
+        <!-- <select id="config-files">Select configuration to load:</select> -->
+        <!-- <b-dropdown right text="Load selected configuration">
+          <b-dropdown-item v-for="file in filelist" v-bind:key="file">{{file}}</b-dropdown-item>
+        </b-dropdown> -->
+        <b-form-select v-model="selectedfile" :options="filelist"></b-form-select>
         <p></p>
         <b-button v-on:click="defineConfigurables()">Load selected configuration</b-button>
         <p></p>
       </b-col>
 
-      <div>
-        <form id="config-params"></form>
-      </div>
+      <b-row v-for="(element, ind) in xmlparams" v-bind:key="element" >
+        <b-col>
+          <label for="`Input-${ind}`"> {{ind}}</label>
+        </b-col>
+        <!-- <form id="config-params"></form> -->
+        <b-col>
+          <b-form-input id="Input-${ind}" v-model="tempxmlparams[ind]" placeholder="xyz"></b-form-input>
+        </b-col>
+      </b-row>
+
+      <b-row v-if="Object.keys(xmlparams).length>0">
+        <b-col>
+          <b-form-input v-model="newfilename" placeholder="Optional: name new configuration"></b-form-input>
+        </b-col>
+      </b-row>
 
       <p></p>
       <b-button v-on:click="submitChanges()">Save changes as new configuration</b-button>
@@ -117,34 +133,44 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      msg: 'Welcome to Your Vue.js App',
+      xmlparams: {},
+      filelist: [],
+      selectedfile: '',
+      boxvalue: '',
+      newfilename: ''
     }
   },
   mounted: function () {
     this.grabAllConfigs()
   },
   methods: {
-    readOptions: function () {
-      // reads values of html forms
-      var elementlength = document.getElementById('config-params').querySelectorAll('*[id*="input"]').length // number of parameters
-      var cform = document.getElementById('config-params')
-      var newdict = {}
-      for (var i = 0; i < elementlength; i++) {
-        var newtag = cform['input' + i].name
-        var newval = cform['input' + i].value
-        newdict[newtag] = newval
-      }
-      console.log(newdict)
-      return newdict
-    },
+    // readOptions: function () {
+    //   // reads values of html forms
+    //   // var elementlength = document.getElementById('config-params').querySelectorAll('*[id*="input"]').length // number of parameters
+    //   // var cform = document.getElementById('config-params')
+
+    //   // var newdict = {}
+    //   // for (var i = 0; i < elementlength; i++) {
+    //   //   var newtag = cform['input' + i].name
+    //   //   var newval = cform['input' + i].value
+    //   //   newdict[newtag] = newval
+    //   // }
+    //   // console.log(newdict)
+    //   console.log('XML ', this.xmlparams)
+    //   console.log('TEMP ', this.tempxmlparams)
+
+    //   this.xmlparams = this.tempxmlparams
+    //   return this.xmlparams
+    // },
     submitChanges: function () {
       // sends output of readOptions() to server
-      console.log('BASECONFIG ' + document.getElementById('config-files').value)
-      console.log('UPDATES ' + this.readOptions())
+      // console.log('BASECONFIG ' + document.getElementById('config-files').value)
+      // this.readOptions()
       axios.post('/api/updateConfigFromParams', {
-        baseConfig: document.getElementById('config-files').value,
-        updates: this.readOptions(),
-        newfilename: document.getElementById('newfilename').value
+        baseConfig: this.selectedfile,
+        updates: this.tempxmlparams,
+        newfilename: this.newfilename
       }).then(function (response) {
         console.log(response)
       }).catch(function (error) {
@@ -155,41 +181,46 @@ export default {
       // recieves dict of parameters being configured
       // dynamically declares editable forms for each parameter
       // clears any previously declared elements
-      var editables = document.getElementById('config-params')
-      while (editables.hasChildNodes()) {
-        editables.removeChild(editables.firstElementChild)
-      }
+
+      // var editables = document.getElementById('config-params')
+      // while (editables.hasChildNodes()) {
+      //   editables.removeChild(editables.firstElementChild)
+      // }
       axios.post('/api/getConfigParams', {
-        selectedConfig: document.getElementById('config-files').value
-      }).then(function (response) {
+        selectedConfig: this.selectedfile
+      }).then(response => {
         console.log(response.data)
-        var params = response.data
-        var keys = Object.keys(params)
-        console.log(keys)
-        var forms = document.getElementById('config-params')
+        this.xmlparams = response.data
+        this.tempxmlparams = JSON.parse(JSON.stringify(this.xmlparams))
+        this.paramlength = response.data.length
+      //   var keys = Object.keys(this.xmlparams)
+      //   console.log(keys)
+      //   var forms = document.getElementById('config-params')
 
-        for (var i = 0; i < keys.length; i++) {
-          var label = document.createElement('label')
-          label.for = keys[i]
-          label.innerText = keys[i] + ': '
-          console.log(label.text)
-          forms.appendChild(label)
+      //   for (var i = 0; i < keys.length; i++) {
+      //     var label = document.createElement('label')
+      //     label.for = keys[i]
+      //     label.innerText = keys[i] + ': '
+      //     console.log(label.text)
+      //     forms.appendChild(label)
 
-          var p = document.createElement('input')
-          p.id = 'input' + i
-          p.name = keys[i]
-          p.value = params[keys[i]]
-          forms.appendChild(p)
+      //     var p = document.createElement('input')
+      //     p.id = 'input' + i
+      //     p.name = keys[i]
+      //     p.value = this.xmlparams[keys[i]]
+      //     forms.appendChild(p)
 
-          forms.appendChild(document.createElement('br'))
-        }
-        forms.appendChild(document.createElement('p'))
-        var namebox = document.createElement('input')
-        namebox.id = 'newfilename'
-        namebox.placeholder = 'Optional: name new configuration'
-        forms.appendChild(namebox)
-      }).catch(function (error) {
-        console.log(error)
+      //     forms.appendChild(document.createElement('br'))
+      //   }
+      //   forms.appendChild(document.createElement('p'))
+      //   var namebox = document.createElement('input')
+      //   namebox.id = 'newfilename'
+      //   namebox.placeholder = 'Optional: name new configuration'
+      //   namebox.size = '30'
+      //   forms.appendChild(namebox)
+      // }).catch(function (error) {
+      //   console.log(error)
+      // })
       })
     },
     grabAllConfigs: function () {
@@ -197,20 +228,21 @@ export default {
       this.axios.post('/api/listAllConfigs', {
       }).then(response => {
         console.log(response)
-        this.fillConfigMenu(response.data.cfiles)
+        this.filelist = response.data.cfiles
+        // this.fillConfigMenu(response.data.cfiles)
       }).catch(function (error) {
         console.log(error)
       })
-    },
-    fillConfigMenu: function (cfiles) {
-      // fill dropdown selection with list of config files
-      var menu = document.getElementById('config-files')
-      for (var i = 0; i < cfiles.length; i++) {
-        var newOption = document.createElement('option')
-        newOption.innerHTML = cfiles[i]
-        menu.appendChild(newOption)
-      }
     }
+    // fillConfigMenu: function (cfiles) {
+    //   // fill dropdown selection with list of config files
+    //   var menu = document.getElementById('config-files')
+    //   for (var i = 0; i < cfiles.length; i++) {
+    //     var newOption = document.createElement('option')
+    //     newOption.innerHTML = cfiles[i]
+    //     menu.appendChild(newOption)
+    //   }
+    // }
   }
 }
 // function testFunction () {

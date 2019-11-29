@@ -10,25 +10,30 @@
       <!-- For some reason, above bootstrap method does not fill dropdown properly-->
       <b-col sm="12">
         <select id="config-files">Select configuration to load:</select>
-        <b-button v-on:click="getSelectedConfigText()">Load selected configuration</b-button><br>
+        <b-button v-on:click="getSelectedConfigText()">Load selected configuration</b-button><p></p>
       </b-col>
     </b-row>
 
     <b-row>
-      <b-col sm="12">
+      <b-col sm="1">
+      </b-col>
+      <b-col sm="10">
         <b-form-textarea
           id="textarea"
           v-model="ctext"
           placeholder="Enter something..."
           rows="8"
-        ></b-form-textarea>
+          size="100"
+        ></b-form-textarea><p></p>
+      </b-col>
+      <b-col sm="1">
       </b-col>
     </b-row>
 
     <b-row>
       <b-col sm="12">
-        <input type="text" id="newfilename" placeholder="Optional: name new configuration">
-      </b-col>      
+        <input type="text" size="30" id="newfilename" placeholder="Optional: name new configuration"><p></p>
+      </b-col>
     </b-row>
 
     <b-row>

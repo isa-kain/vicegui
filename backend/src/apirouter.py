@@ -38,10 +38,11 @@ def getConfigParams():
 
   paramdict = {}
   for element in paramlist:
-    tag = element.name
-    val = element.string
-    print(tag, val)
-    paramdict.update( {tag:val} )
+    if len(list(element.children))==1:
+      tag = element.name
+      val = element.string
+      print(tag, val)
+      paramdict.update( {tag:val} )
 
   return jsonify(paramdict)
 
@@ -92,14 +93,32 @@ def updateConfigFromParams():
   soup = bs.BeautifulSoup(baseconfig, 'xml')
   print(soup.prettify)
 
-  elementslist = soup.find_all()
-  for i, element in enumerate(elementslist):
-    # print('Element: ', element, element.name, element.string)
-    if element.name in updates.keys():
-      print('Element: ', element.string, 'Matching update: ', updates[element.name])
-      elementslist[i].string = updates[element.name]
-  
-  print('YAY IS UPDATED: ', soup.prettify)
+  # elementslist = soup.find_all()
+  # for i, element in enumerate(elementslist):
+  #   # print('Element: ', element, element.name, element.string)
+  #   if element.name in updates.keys():
+  #     print('Element: ', element.string, 'Matching update: ', updates[element.name])
+  #     elementslist[i].string = updates[element.name]
+
+  # for tag in soup.find_all():
+  #   print(tag)
+  #   if tag.name in updates.keys():
+  #     tag.string = updates[tag.name]
+
+  # print('SOUP: ', soup)
+
+
+  for tag in soup.find_all():
+    # print('TAG NAME BEFORE IF', tag.name, 'LEN CHILDREN', len(list(tag.children)))
+    if len(list(tag.children))==1:
+      if tag.name in updates.keys():
+        # print('TAG NAME', tag.name)
+        # print('TAG STRING', tag.string)
+        tag.string = updates[tag.name]
+      
+  # print('SOUP: ', soup)
+
+  # print('YAY IS UPDATED: ', soup.prettify())
   createNewConfig(txt=str(soup), newfilename=newfilename)
 
   return ''
